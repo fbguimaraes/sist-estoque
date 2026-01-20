@@ -1,5 +1,6 @@
 import router from '@adonisjs/core/services/router';
 import { middleware } from '#start/kernel';
+router.get('/', '#controllers/documentation_controller.index');
 router.group(() => {
     router.post('/register', '#controllers/auth_controller.register');
     router.post('/login', '#controllers/auth_controller.login');

@@ -11,6 +11,11 @@ import router from '@adonisjs/core/services/router'
 import { middleware } from '#start/kernel'
 
 /**
+ * Rota raiz - Documentação da API
+ */
+router.get('/', '#controllers/documentation_controller.index')
+
+/**
  * Rotas públicas de autenticação
  */
 router.group(() => {
