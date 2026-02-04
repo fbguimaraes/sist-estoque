@@ -735,7 +735,7 @@ curl -X PATCH http://127.0.0.1:3333/api/alerts/all/mark-read \
 ### 5.7 Deletar Alerta
 
 ```bash
-curl -X DELETE http://127.0.0.1:3333/api/alerts/1 \
+curl -git push -u origin mainX DELETE http://127.0.0.1:3333/api/alerts/1 \
   -H "Authorization: Bearer {seu_token}"
 ```
 

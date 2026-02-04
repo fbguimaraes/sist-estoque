@@ -1,6 +1,18 @@
 import router from '@adonisjs/core/services/router';
 import { middleware } from '#start/kernel';
-router.get('/', '#controllers/documentation_controller.index');
+import fs from 'fs/promises';
+import path from 'path';
+router.get('/', async ({ response }) => {
+    try {
+        const filePath = path.join(import.meta.url.replace('file://', ''), '../../public/index.html');
+        const content = await fs.readFile(filePath.replace('start/routes.ts', 'public/index.html'), 'utf-8');
+        return response.header('Content-Type', 'text/html').send(content);
+    }
+    catch (error) {
+        return response.send('<h1>Testador Visual</h1><p>Abra a página inicial no navegador</p>');
+    }
+});
+router.get('/api-docs', '#controllers/documentation_controller.index');
 router.group(() => {
     router.post('/register', '#controllers/auth_controller.register');
     router.post('/login', '#controllers/auth_controller.login');

@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SistEstoque - Testador de API</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #3498db;
+      --success: #27ae60;
+      --danger: #e74c3c;
+      --warning: #f39c12;
+      --dark: #2c3e50;
+      --light: #ecf0f1;
+      --gray: #95a5a6;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    h1 {
+      color: var(--dark);
+      margin-bottom: 10px;
+      font-size: 2.5em;
+    }
+
+    .subtitle {
+      color: var(--gray);
+      font-size: 1.1em;
+    }
+
+    .token-section {
+      background: var(--light);
+      padding: 15px 20px;
+      border-radius: 5px;
+      margin-top: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .token-display {
+      flex: 1;
+      min-width: 200px;
+      padding: 8px 12px;
+      background: white;
+      border-radius: 3px;
+      font-family: monospace;
+      font-size: 0.9em;
+      word-break: break-all;
+      max-height: 30px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .token-status {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.9em;
+      font-weight: bold;
+    }
+
+    .token-status.inactive {
+      background: #ffebee;
+      color: var(--danger);
+    }
+
+    .token-status.active {
+      background: #e8f5e9;
+      color: var(--success);
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    @media (max-width: 1200px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: white;
+      border-radius: 10px;
+      padding: 25px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .panel h2 {
+      color: var(--dark);
+      margin-bottom: 20px;
+      font-size: 1.5em;
+      border-bottom: 3px solid var(--primary);
+      padding-bottom: 10px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--dark);
+      font-weight: 500;
+      font-size: 0.95em;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 2px solid var(--light);
+      border-radius: 5px;
+      font-size: 0.95em;
+      transition: border-color 0.3s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    @media (max-width: 600px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 5px;
+      font-size: 1em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      width: 100%;
+    }
+
+    .btn-primary:hover {
+      background: #2980b9;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: white;
+      width: 100%;
+    }
+
+    .btn-success:hover {
+      background: #229954;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(39, 174, 96, 0.3);
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+      width: 100%;
+    }
+
+    .btn-danger:hover {
+      background: #c0392b;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+    }
+
+    .btn-warning {
+      background: var(--warning);
+      color: white;
+      width: 100%;
+    }
+
+    .btn-warning:hover {
+      background: #d68910;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(243, 156, 18, 0.3);
+    }
+
+    .btn-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .btn-secondary {
+      background: var(--gray);
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #7f8c8d;
+    }
+
+    .response-panel {
+      grid-column: 1 / -1;
+      background: var(--dark);
+      color: #0f0;
+      padding: 20px;
+      border-radius: 5px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+      max-height: 500px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .alert {
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .alert-success {
+      background: #d4edda;
+      color: #155724;
+      border-left: 4px solid var(--success);
+    }
+
+    .alert-error {
+      background: #f8d7da;
+      color: #721c24;
+      border-left: 4px solid var(--danger);
+    }
+
+    .alert-info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border-left: 4px solid var(--primary);
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      padding: 10px 15px;
+      border: 2px solid var(--light);
+      background: white;
+      color: var(--dark);
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .select-list {
+      background: var(--light);
+      border-radius: 5px;
+      max-height: 200px;
+      overflow-y: auto;
+      padding: 10px;
+    }
+
+    .list-item {
+      padding: 10px;
+      background: white;
+      margin-bottom: 8px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .list-item:hover {
+      background: var(--primary);
+      color: white;
+    }
+
+    .list-item.selected {
+      background: var(--success);
+      color: white;
+    }
+
+    .spinner {
+      border: 3px solid var(--light);
+      border-top: 3px solid var(--primary);
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 0.6s linear infinite;
+      display: inline-block;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .status {
+      font-size: 0.85em;
+      padding: 5px 10px;
+      border-radius: 3px;
+      display: inline-block;
+      margin-top: 5px;
+    }
+
+    .status.pending {
+      background: var(--warning);
+      color: white;
+    }
+
+    .status.success {
+      background: var(--success);
+      color: white;
+    }
+
+    .status.error {
+      background: var(--danger);
+      color: white;
+    }
+
+    .clear-btn {
+      background: var(--gray);
+      color: white;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 0.85em;
+    }
+
+    .clear-btn:hover {
+      background: #7f8c8d;
+    }
+
+    footer {
+      text-align: center;
+      color: white;
+      margin-top: 30px;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🧪 SistEstoque API Tester</h1>
+      <p class="subtitle">Interface para testar todos os endpoints da API</p>
+      <div class="token-section">
+        <span style="font-weight: bold; color: var(--dark);">Token:</span>
+        <div class="token-display" id="tokenDisplay">Nenhum token</div>
+        <div class="token-status inactive" id="tokenStatus">Desconectado</div>
+        <button class="clear-btn" onclick="clearToken()">Limpar</button>
+      </div>
+    </header>
+
+    <div class="main-grid">
+      <!-- AUTENTICAÇÃO -->
+      <div class="panel">
+        <h2>🔐 Autenticação</h2>
+        
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchTab(event, 'register')">Registrar</button>
+          <button class="tab-btn" onclick="switchTab(event, 'login')">Login</button>
+        </div>
+
+        <div id="register" class="tab-content active">
+          <div class="form-group">
+            <label>Nome</label>
+            <input type="text" id="regName" placeholder="Seu nome completo">
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="regEmail" placeholder="seu@email.com">
+          </div>
+          <div class="form-group">
+            <label>Senha (mín. 8 caracteres)</label>
+            <input type="password" id="regPassword" placeholder="••••••••">
+          </div>
+          <button class="btn-primary" onclick="register()">Registrar</button>
+        </div>
+
+        <div id="login" class="tab-content">
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="loginEmail" placeholder="seu@email.com">
+          </div>
+          <div class="form-group">
+            <label>Senha</label>
+            <input type="password" id="loginPassword" placeholder="••••••••">
+          </div>
+          <button class="btn-success" onclick="login()">Login</button>
+        </div>
+
+        <button class="btn-secondary" style="margin-top: 10px;" onclick="getProfile()">Ver Perfil</button>
+        <button class="btn-danger" style="margin-top: 10px;" onclick="logout()">Logout</button>
+      </div>
+
+      <!-- CATEGORIAS -->
+      <div class="panel">
+        <h2>📦 Categorias</h2>
+        
+        <div class="form-group">
+          <label>Nome da Categoria</label>
+          <input type="text" id="catName" placeholder="Ex: Eletrônicos">
+        </div>
+        <div class="form-group">
+          <label>Descrição</label>
+          <textarea id="catDesc" placeholder="Descrição opcional" rows="2"></textarea>
+        </div>
+        <button class="btn-primary" onclick="createCategory()">Criar Categoria</button>
+
+        <button class="btn-secondary" style="margin-top: 10px;" onclick="listCategories()">Listar Categorias</button>
+
+        <div class="select-list" id="catList" style="margin-top: 15px; display: none;">
+          <p style="color: var(--gray);">Carregando...</p>
+        </div>
+      </div>
+
+      <!-- PRODUTOS -->
+      <div class="panel">
+        <h2>🛍️ Produtos</h2>
+        
+        <div class="form-group">
+          <label>Categoria</label>
+          <select id="prodCategory" onchange="selectCategory()">
+            <option value="">Selecione uma categoria</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Nome do Produto</label>
+          <input type="text" id="prodName" placeholder="Ex: Monitor LG 24\"">
+        </div>
+        <div class="form-group">
+          <label>Descrição</label>
+          <input type="text" id="prodDesc" placeholder="Descrição do produto">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Preço (R$)</label>
+            <input type="number" id="prodPrice" placeholder="0.00" step="0.01">
+          </div>
+          <div class="form-group">
+            <label>Estoque</label>
+            <input type="number" id="prodStock" placeholder="0">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Estoque Mínimo</label>
+          <input type="number" id="prodMinStock" placeholder="0">
+        </div>
+        <button class="btn-primary" onclick="createProduct()">Criar Produto</button>
+
+        <button class="btn-secondary" style="margin-top: 10px;" onclick="listProducts()">Listar Produtos</button>
+
+        <div class="select-list" id="prodList" style="margin-top: 15px; display: none;">
+          <p style="color: var(--gray);">Carregando...</p>
+        </div>
+      </div>
+
+      <!-- MOVIMENTAÇÕES -->
+      <div class="panel">
+        <h2>📊 Movimentações</h2>
+        
+        <div class="form-group">
+          <label>Produto</label>
+          <select id="movProduct" onchange="selectProduct()">
+            <option value="">Selecione um produto</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Tipo de Movimento</label>
+          <select id="movType">
+            <option value="entrada">Entrada (+)</option>
+            <option value="saida">Saída (-)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Quantidade</label>
+          <input type="number" id="movQuantity" placeholder="0">
+        </div>
+        <button class="btn-primary" onclick="createMovement()">Registrar Movimento</button>
+
+        <button class="btn-secondary" style="margin-top: 10px;" onclick="listMovements()">Listar Movimentações</button>
+      </div>
+
+      <!-- ALERTAS -->
+      <div class="panel">
+        <h2>⚠️ Alertas</h2>
+        
+        <div class="form-group">
+          <label>Produto</label>
+          <select id="alertProduct">
+            <option value="">Selecione um produto</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Tipo de Alerta</label>
+          <select id="alertType">
+            <option value="estoque_baixo">Estoque Baixo</option>
+            <option value="fora_estoque">Fora de Estoque</option>
+            <option value="outro">Outro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Mensagem</label>
+          <textarea id="alertMsg" placeholder="Mensagem do alerta" rows="2"></textarea>
+        </div>
+        <button class="btn-primary" onclick="createAlert()">Criar Alerta</button>
+
+        <button class="btn-warning" style="margin-top: 10px;" onclick="listAlerts()">Listar Alertas</button>
+        <button class="btn-info" style="margin-top: 10px; background: var(--primary);" onclick="markAllRead()">Marcar Todos como Lidos</button>
+      </div>
+
+      <!-- RESPOSTA -->
+      <div class="response-panel" id="response">Respostas aparecerão aqui...</div>
+    </div>
+  </div>
+
+  <footer>
+    <p>API rodando em: <strong>http://127.0.0.1:3333</strong></p>
+    <p>Criado com ❤️ para testar SistEstoque API</p>
+  </footer>
+
+  <script>
+    const API_URL = 'http://127.0.0.1:3333';
+    let token = localStorage.getItem('token');
+    let selectedCategoryId = null;
+    let selectedProductId = null;
+
+    // Inicializar
+    document.addEventListener('DOMContentLoaded', () => {
+      updateTokenStatus();
+      loadCategories();
+      loadProducts();
+      loadAlerts();
+    });
+
+    // ============ UTILITÁRIOS ============
+    function updateTokenStatus() {
+      const display = document.getElementById('tokenDisplay');
+      const status = document.getElementById('tokenStatus');
+      
+      if (token) {
+        display.textContent = token.substring(0, 30) + '...';
+        status.textContent = '✓ Conectado';
+        status.className = 'token-status active';
+      } else {
+        display.textContent = 'Nenhum token';
+        status.textContent = 'Desconectado';
+        status.className = 'token-status inactive';
+      }
+    }
+
+    function clearToken() {
+      token = null;
+      localStorage.removeItem('token');
+      updateTokenStatus();
+      showResponse('Token limpo!', 'success');
+    }
+
+    function showResponse(data, type = 'info') {
+      const resp = document.getElementById('response');
+      let text = '';
+      
+      if (typeof data === 'object') {
+        text = JSON.stringify(data, null, 2);
+      } else {
+        text = data;
+      }
+
+      resp.innerHTML = `<span style="color: ${type === 'error' ? '#ff6b6b' : type === 'success' ? '#51cf66' : '#74c0fc'};">${text}</span>`;
+      resp.parentElement.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function switchTab(event, tabName) {
+      const tabs = event.target.parentElement.querySelectorAll('.tab-btn');
+      const contents = event.target.parentElement.parentElement.querySelectorAll('.tab-content');
+      
+      tabs.forEach(t => t.classList.remove('active'));
+      contents.forEach(c => c.classList.remove('active'));
+      
+      event.target.classList.add('active');
+      document.getElementById(tabName).classList.add('active');
+    }
+
+    async function fetchAPI(endpoint, method = 'GET', body = null) {
+      const options = {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      };
+
+      if (token) {
+        options.headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      if (body) {
+        options.body = JSON.stringify(body);
+      }
+
+      try {
+        const response = await fetch(`${API_URL}${endpoint}`, options);
+        const data = await response.json();
+
+        if (!response.ok) {
+          showResponse(data, 'error');
+          return null;
+        }
+
+        showResponse(data, 'success');
+        return data;
+      } catch (error) {
+        showResponse({ error: error.message }, 'error');
+        return null;
+      }
+    }
+
+    // ============ AUTENTICAÇÃO ============
+    async function register() {
+      const name = document.getElementById('regName').value;
+      const email = document.getElementById('regEmail').value;
+      const password = document.getElementById('regPassword').value;
+
+      if (!name || !email || !password) {
+        showResponse('Preencha todos os campos!', 'error');
+        return;
+      }
+
+      const data = await fetchAPI('/api/auth/register', 'POST', { name, email, password });
+      
+      if (data?.token) {
+        token = data.token;
+        localStorage.setItem('token', token);
+        updateTokenStatus();
+        document.getElementById('regName').value = '';
+        document.getElementById('regEmail').value = '';
+        document.getElementById('regPassword').value = '';
+        loadCategories();
+        loadProducts();
+      }
+    }
+
+    async function login() {
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+
+      if (!email || !password) {
+        showResponse('Preencha todos os campos!', 'error');
+        return;
+      }
+
+      const data = await fetchAPI('/api/auth/login', 'POST', { email, password });
+      
+      if (data?.token) {
+        token = data.token;
+        localStorage.setItem('token', token);
+        updateTokenStatus();
+        document.getElementById('loginEmail').value = '';
+        document.getElementById('loginPassword').value = '';
+        loadCategories();
+        loadProducts();
+      }
+    }
+
+    async function getProfile() {
+      if (!token) {
+        showResponse('Faça login primeiro!', 'error');
+        return;
+      }
+      await fetchAPI('/api/auth/me');
+    }
+
+    async function logout() {
+      if (!token) {
+        showResponse('Você não está conectado!', 'error');
+        return;
+      }
+      await fetchAPI('/api/auth/logout', 'POST');
+      clearToken();
+    }
+
+    // ============ CATEGORIAS ============
+    async function createCategory() {
+      const name = document.getElementById('catName').value;
+      const description = document.getElementById('catDesc').value;
+
+      if (!name) {
+        showResponse('Nome é obrigatório!', 'error');
+        return;
+      }
+
+      const data = await fetchAPI('/api/categories', 'POST', { name, description });
+      
+      if (data) {
+        document.getElementById('catName').value = '';
+        document.getElementById('catDesc').value = '';
+        loadCategories();
+      }
+    }
+
+    async function loadCategories() {
+      const data = await fetchAPI('/api/categories');
+      
+      if (Array.isArray(data)) {
+        const select = document.getElementById('prodCategory');
+        const list = document.getElementById('catList');
+        
+        select.innerHTML = '<option value="">Selecione uma categoria</option>';
+        list.innerHTML = '';
+
+        data.forEach(cat => {
+          const option = document.createElement('option');
+          option.value = cat.id;
+          option.textContent = cat.name;
+          select.appendChild(option);
+
+          const item = document.createElement('div');
+          item.className = 'list-item';
+          item.textContent = `${cat.name} (ID: ${cat.id})`;
+          item.onclick = () => selectCategoryFromList(cat.id, cat.name);
+          list.appendChild(item);
+        });
+
+        list.style.display = data.length > 0 ? 'block' : 'none';
+      }
+    }
+
+    function selectCategory() {
+      selectedCategoryId = document.getElementById('prodCategory').value;
+    }
+
+    function selectCategoryFromList(id, name) {
+      selectedCategoryId = id;
+      document.getElementById('prodCategory').value = id;
+      showResponse(`Categoria selecionada: ${name}`, 'info');
+    }
+
+    // ============ PRODUTOS ============
+    async function createProduct() {
+      const name = document.getElementById('prodName').value;
+      const description = document.getElementById('prodDesc').value;
+      const price = parseFloat(document.getElementById('prodPrice').value);
+      const stock_quantity = parseInt(document.getElementById('prodStock').value) || 0;
+      const minimum_stock = parseInt(document.getElementById('prodMinStock').value) || 0;
+      const categoryId = parseInt(document.getElementById('prodCategory').value);
+
+      if (!name || !price || !categoryId) {
+        showResponse('Nome, Preço e Categoria são obrigatórios!', 'error');
+        return;
+      }
+
+      const data = await fetchAPI('/api/products', 'POST', {
+        name, description, price, stock_quantity, minimum_stock, categoryId
+      });
+
+      if (data) {
+        document.getElementById('prodName').value = '';
+        document.getElementById('prodDesc').value = '';
+        document.getElementById('prodPrice').value = '';
+        document.getElementById('prodStock').value = '';
+        document.getElementById('prodMinStock').value = '';
+        loadProducts();
+      }
+    }
+
+    async function loadProducts() {
+      const data = await fetchAPI('/api/products');
+      
+      if (Array.isArray(data)) {
+        const select = document.getElementById('movProduct');
+        const alertSelect = document.getElementById('alertProduct');
+        const list = document.getElementById('prodList');
+        
+        select.innerHTML = '<option value="">Selecione um produto</option>';
+        alertSelect.innerHTML = '<option value="">Selecione um produto</option>';
+        list.innerHTML = '';
+
+        data.forEach(prod => {
+          const option = document.createElement('option');
+          option.value = prod.id;
+          option.textContent = prod.name;
+          select.appendChild(option);
+
+          const alertOption = document.createElement('option');
+          alertOption.value = prod.id;
+          alertOption.textContent = prod.name;
+          alertSelect.appendChild(alertOption);
+
+          const item = document.createElement('div');
+          item.className = 'list-item';
+          item.textContent = `${prod.name} - R$ ${prod.price} (Estoque: ${prod.stockQuantity})`;
+          item.onclick = () => selectProductFromList(prod.id, prod.name);
+          list.appendChild(item);
+        });
+
+        list.style.display = data.length > 0 ? 'block' : 'none';
+      }
+    }
+
+    function selectProduct() {
+      selectedProductId = document.getElementById('movProduct').value;
+    }
+
+    function selectProductFromList(id, name) {
+      selectedProductId = id;
+      document.getElementById('movProduct').value = id;
+      showResponse(`Produto selecionado: ${name}`, 'info');
+    }
+
+    // ============ MOVIMENTAÇÕES ============
+    async function createMovement() {
+      const productId = parseInt(document.getElementById('movProduct').value);
+      const type = document.getElementById('movType').value;
+      const quantity = parseInt(document.getElementById('movQuantity').value);
+
+      if (!productId || !quantity) {
+        showResponse('Produto e Quantidade são obrigatórios!', 'error');
+        return;
+      }
+
+      const data = await fetchAPI('/api/stock-movements', 'POST', {
+        productId, type, quantity
+      });
+
+      if (data) {
+        document.getElementById('movQuantity').value = '';
+        loadProducts();
+      }
+    }
+
+    async function listMovements() {
+      await fetchAPI('/api/stock-movements');
+    }
+
+    // ============ ALERTAS ============
+    async function createAlert() {
+      const productId = parseInt(document.getElementById('alertProduct').value);
+      const alertType = document.getElementById('alertType').value;
+      const message = document.getElementById('alertMsg').value;
+
+      if (!productId || !message) {
+        showResponse('Produto e Mensagem são obrigatórios!', 'error');
+        return;
+      }
+
+      const data = await fetchAPI('/api/alerts', 'POST', {
+        productId, alertType, message
+      });
+
+      if (data) {
+        document.getElementById('alertMsg').value = '';
+        loadAlerts();
+      }
+    }
+
+    async function listAlerts() {
+      await fetchAPI('/api/alerts');
+    }
+
+    async function loadAlerts() {
+      await fetchAPI('/api/alerts');
+    }
+
+    async function markAllRead() {
+      await fetchAPI('/api/alerts/all/mark-read', 'PATCH');
+      loadAlerts();
+    }
+  </script>
+</body>
+</html>
